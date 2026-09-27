@@ -2,6 +2,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+// Include Graphics
+#include "graphics.h"
+
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
@@ -30,6 +33,10 @@ void setup() {
     Serial.println(F("SSD1306 Allocation failed"));
     for(;;);
   }
+
+  display.clearDisplay();
+  display.drawBitmap(0, 0, graphic_leafs, 128, 64, SSD1306_WHITE);
+  display.display();
 }
 
 void loop() {
