@@ -19,7 +19,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int waterSensorPin = 0;
 int ldrPin = 2;
+
 long totalValue;
+int waterPercent = 0;
+int ldrPercent = 0;
 
 void setup() {
   // Starting Serial Communication
@@ -40,11 +43,15 @@ void setup() {
 }
 
 void loop() {
+  delay(2000);
   totalValue = 0;
   watersensor();
+
   totalValue = 0;
   ldr();
-  delay(500);
+
+  //Show sensor values on display
+  drawDashboard();
 }
 
 void watersensor(){
@@ -57,7 +64,7 @@ void watersensor(){
   int waterSensorValue = totalValue / 5;
 
   //Convert value into percent
-  int waterPercent = map(waterSensorValue, 0, 4095, 0, 100);
+  waterPercent = map(waterSensorValue, 0, 4095, 0, 100);
   waterPercent = constrain(waterPercent, 0, 100);
 
   Serial.print("WaterSensor Value: ");
@@ -76,7 +83,7 @@ void ldr(){
   int ldrValue = totalValue / 5;
 
   //Convert value into percent
-  int ldrPercent = map(ldrValue, 400, 4095, 0, 100);
+  ldrPercent = map(ldrValue, 400, 4095, 0, 100);
   ldrPercent = constrain(ldrPercent, 0, 100);
 
   Serial.print("Brightness: ");
@@ -84,4 +91,30 @@ void ldr(){
   Serial.print(" (");
   Serial.print(ldrPercent);
   Serial.println("%)");
+}
+
+void drawDashboard(){
+  display.clearDisplay();
+
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(28, 2);
+  display.print("Plant Health");
+
+  display.drawLine(0, 14, 128, 14, SSD1306_WHITE);
+
+  // water sensor values
+  display.setCursor(0, 28);
+  display.print("Soil Moisture: ");
+  display.setCursor(96, 28);
+  display.print(waterPercent);
+  display.print("%");
+
+  // light level values
+  display.setCursor(0, 45);
+  display.print("Light Level: ");
+  display.print(ldrPercent);
+  display.print("%");
+
+  display.display();
 }
