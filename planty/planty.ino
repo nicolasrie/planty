@@ -29,7 +29,6 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int waterSensorPin = 0;
 int ldrPin = 2;
 
-long totalValue;
 int waterPercent = 0;
 int ldrPercent = 0;
 
@@ -73,10 +72,7 @@ void loop() {
   delay(2000);
   server.handleClient();
 
-  totalValue = 0;
   watersensor();
-
-  totalValue = 0;
   ldr();
 
   //Show sensor values on display
@@ -84,6 +80,7 @@ void loop() {
 }
 
 void watersensor(){
+  long totalValue = 0;
   // Generate the average of all values (water sensor)
     for (int i = 0; i < 5; i = i + 1){
     // Read the current value of the water sensor
@@ -103,6 +100,7 @@ void watersensor(){
 }
 
 void ldr(){
+  long totalValue = 0;
   // Generate the avarage of all values (ldr)
   for (int i = 0; i < 5; i = i + 1){
     // Read the current value of the ldr
