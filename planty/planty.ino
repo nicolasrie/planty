@@ -1,4 +1,5 @@
 int waterSensorPin = 0;
+int ldrPin = 2;
 
 void setup() {
   // Starting Serial Communication
@@ -19,10 +20,15 @@ void loop() {
   int waterPercent = map(sensorValue, 0, 4095, 0, 100);
   waterPercent = constrain(waterPercent, 0, 100);
 
+  int ldrValue = analogRead(ldrPin);
+
   Serial.print("Sensor Value: ");
   Serial.println(sensorValue);
   Serial.print("Water Percentage: ");
   Serial.println(waterPercent);
+
+  Serial.print("Brightness: ");
+  Serial.println(ldrValue);
 
   delay(500);
 }
