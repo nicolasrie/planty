@@ -1,3 +1,19 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+
+// OLED Display Pins
+int i2c_sda = 5;
+int i2c_scl = 6;
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
 int waterSensorPin = 0;
 int ldrPin = 2;
 long totalValue;
@@ -5,6 +21,15 @@ long totalValue;
 void setup() {
   // Starting Serial Communication
   Serial.begin(9600);
+
+  // Starting I2C on SCL and SDA Pin
+  Wire.begin(i2c_sda, i2c_scl);
+
+  // Initialise display
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 Allocation failed"));
+    for(;;);
+  }
 }
 
 void loop() {
