@@ -20,7 +20,17 @@ void loop() {
   int waterPercent = map(sensorValue, 0, 4095, 0, 100);
   waterPercent = constrain(waterPercent, 0, 100);
 
-  int ldrValue = analogRead(ldrPin);
+  // Generate the avarage of all values (ldr)
+  for (int i = 0; i < 5; i = i + 1){
+    // Read the current value of the ldr
+    totalValue += analogRead(ldrPin);
+    delay(10);
+  }
+  int ldrValue = totalValue / 5;
+
+  //Convert value into percent
+  int ldrPercent = map(ldrValue, 400, 4095, 0, 100);
+  ldrPercent = constrain(ldrPercent, 0, 100);
 
   Serial.print("Sensor Value: ");
   Serial.println(sensorValue);
@@ -28,7 +38,10 @@ void loop() {
   Serial.println(waterPercent);
 
   Serial.print("Brightness: ");
-  Serial.println(ldrValue);
+  Serial.print(ldrValue);
+  Serial.print(" (");
+  Serial.print(ldrPercent);
+  Serial.println("%)");
 
   delay(500);
 }
