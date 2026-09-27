@@ -2,14 +2,23 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+
 // Include Graphics
 #include "graphics.h"
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
+#include <WiFi.h>
+#include <WebServer.h>
+#include <FS.h>
+#include <LittleFS.h>
 
-#define OLED_RESET -1
-#define SCREEN_ADDRESS 0x3C
+// Web Server on port 80
+WebServer server(80);
+
+#include "secrets.h"
 
 // OLED Display Pins
 int i2c_sda = 5;
@@ -40,10 +49,30 @@ void setup() {
   display.clearDisplay();
   display.drawBitmap(0, 0, graphic_leafs, 128, 64, SSD1306_WHITE);
   display.display();
+
+  // Connecting to WiFi and starting webserver
+  if(!LittleFS.begin(true)){
+    Serial.println("Failed to mount LittleFS");
+    return;
+  }
+
+  Serial.println("Connecting to WiFi");
+  WiFi.begin(WiFi_SSID, WiFi_Password);
+  while(WiFi.status() != WL_CONNECTED){
+    delay(50);
+  }
+  Serial.println("Connected!");
+  Serial.print("IP-Adress: ");
+  Serial.println(WiFi.localIP());
+  server.on("/", handleRoot);
+  server.on("/style.css", HTTP_GET, handleCss);
+  server.begin();
 }
 
 void loop() {
   delay(2000);
+  server.handleClient();
+
   totalValue = 0;
   watersensor();
 
@@ -117,4 +146,32 @@ void drawDashboard(){
   display.print("%");
 
   display.display();
+}
+
+void handleRoot() {
+  // html
+  File file = LittleFS.open("/index.html", "r");
+  if(!file){
+    server.send(404, "text/plain", "File not found");
+    return;
+  }
+
+  String html = file.readString();
+  file.close();
+
+  html.replace("%WATER_VAL%", String(waterPercent));
+  html.replace("%LIGHT_VAL%", String(ldrPercent));
+
+  server.send(200, "text/html", html);
+}
+
+void handleCss() {
+  // css
+  File file = LittleFS.open("/style.css", "r");
+  if(!file){
+    server.send(404, "text/plain", "File not found");
+    return;
+  }
+  server.streamFile(file, "text/css");
+  file.close();
 }
