@@ -49,10 +49,12 @@ void setup() {
   display.drawBitmap(0, 0, graphic_leafs, 128, 64, SSD1306_WHITE);
   display.display();
 
-  // Connecting to WiFi and starting webserver
-  if(!LittleFS.begin(true)){
-    Serial.println("Failed to mount LittleFS");
-    return;
+  if(External_Dashboard == false) {
+    // Connecting to WiFi and starting webserver
+    if(!LittleFS.begin(true)){
+      Serial.println("Failed to mount LittleFS");
+      return;
+    }
   }
 
   Serial.println("Connecting to WiFi");
@@ -63,8 +65,17 @@ void setup() {
   Serial.println("Connected!");
   Serial.print("IP-Adress: ");
   Serial.println(WiFi.localIP());
-  server.on("/", handleRoot);
-  server.on("/style.css", HTTP_GET, handleCss);
+
+  // Configure the web server depending on the selected dashboard mode
+  if (External_Dashboard == true) {
+    // Register the API endpoint for external dashboard access
+    server.on("/api/status", HTTP_GET, handleApi);
+  } else {
+    // Register the routes for the internal dashboard
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/style.css", HTTP_GET, handleCss);
+  }
+
   server.begin();
 }
 
@@ -172,4 +183,14 @@ void handleCss() {
   }
   server.streamFile(file, "text/css");
   file.close();
+}
+
+// Handle API requests and return the current sensor values as JSON
+void handleApi() {
+  String json = "{";
+  json += "\"water\": " + String(waterPercent) + ",";
+  json += "\"light\": " + String(ldrPercent);
+  json += "}";
+
+  server.send(200, "application/json", json);
 }
