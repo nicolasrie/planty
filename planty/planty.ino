@@ -14,6 +14,7 @@
 #include <WebServer.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include <time.h>
 
 // Web Server on port 80
 WebServer server(80);
@@ -65,6 +66,9 @@ void setup() {
   Serial.println("Connected!");
   Serial.print("IP-Adress: ");
   Serial.println(WiFi.localIP());
+
+  // Configure timezone and synchronize time using NTP
+  configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
 
   // Configure the web server depending on the selected dashboard mode
   if (External_Dashboard == true) {
@@ -185,11 +189,15 @@ void handleCss() {
   file.close();
 }
 
-// Handle API requests and return the current sensor values as JSON
+// Handle API requests and return current sensor values as JSON
 void handleApi() {
+  time_t now;
+  time(&now);
+
   String json = "{";
   json += "\"water\": " + String(waterPercent) + ",";
-  json += "\"light\": " + String(ldrPercent);
+  json += "\"light\": " + String(ldrPercent) + ",";
+  json += "\"timestamp\": " + String((long)now);
   json += "}";
 
   server.send(200, "application/json", json);
