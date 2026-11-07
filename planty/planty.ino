@@ -34,6 +34,7 @@ int waterPercent = 0;
 int ldrPercent = 0;
 
 long millis_lastMeasurement = 0;
+long millis_lastWiFiAttempt = 0;
 
 void setup() {
   // Starting Serial Communication
@@ -62,12 +63,20 @@ void setup() {
 
   Serial.println("Connecting to WiFi");
   WiFi.begin(WiFi_SSID, WiFi_Password);
-  while(WiFi.status() != WL_CONNECTED){
+  WiFi.mode(WIFI_STA);
+  long wifi_startAttempt = millis();
+  // Check every 50ms for 10s if connected to WiFi
+  while(WiFi.status() != WL_CONNECTED && millis() - wifi_startAttempt < 10000){
     delay(50);
   }
-  Serial.println("Connected!");
-  Serial.print("IP-Adress: ");
-  Serial.println(WiFi.localIP());
+  if(WiFi.status() == WL_CONNECTED){
+    Serial.println("Connected!");
+    Serial.print("IP-Adress: ");
+    Serial.println(WiFi.localIP());
+  } else{
+    Serial.println("WiFi connection failed!");
+  }
+  WiFi.setAutoReconnect(true);
 
   // Configure timezone and synchronize time using NTP
   configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
@@ -95,6 +104,14 @@ void loop() {
 
     //Show sensor values on display
     drawDashboard();
+  }
+
+  // If not connected with WiFi, try to connect
+  if(WiFi.status() != WL_CONNECTED && millis() - millis_lastWiFiAttempt >= 10000){
+    millis_lastWiFiAttempt = millis();
+
+    Serial.println("Trying to reconnect to WiFi...");
+    WiFi.begin(WiFi_SSID, WiFi_Password);
   }
 }
 
