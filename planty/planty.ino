@@ -33,6 +33,8 @@ int ldrPin = 2;
 int waterPercent = 0;
 int ldrPercent = 0;
 
+long millis_lastMeasurement = 0;
+
 void setup() {
   // Starting Serial Communication
   Serial.begin(9600);
@@ -84,14 +86,16 @@ void setup() {
 }
 
 void loop() {
-  delay(2000);
   server.handleClient();
 
-  watersensor();
-  ldr();
+  if (millis() - millis_lastMeasurement >= 2000){
+    millis_lastMeasurement = millis();
+    watersensor();
+    ldr();
 
-  //Show sensor values on display
-  drawDashboard();
+    //Show sensor values on display
+    drawDashboard();
+  }
 }
 
 void watersensor(){
