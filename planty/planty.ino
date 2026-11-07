@@ -36,6 +36,10 @@ int ldrPercent = 0;
 long millis_lastMeasurement = 0;
 long millis_lastWiFiAttempt = 0;
 
+long millis_lastStorage = 0;
+long storageInterval = 120000;
+int maxFileSize = 500 * 1024; // 500 KB
+
 void setup() {
   // Starting Serial Communication
   Serial.begin(9600);
@@ -53,14 +57,12 @@ void setup() {
   display.drawBitmap(0, 0, graphic_leafs, 128, 64, SSD1306_WHITE);
   display.display();
 
-  if(External_Dashboard == false) {
-    // Connecting to WiFi and starting webserver
-    if(!LittleFS.begin(true)){
-      Serial.println("Failed to mount LittleFS");
-      return;
-    }
+  if(!LittleFS.begin(true)){
+    Serial.println("Failed to mount LittleFS");
+    return;
   }
 
+  // Connecting to WiFi and starting webserver
   Serial.println("Connecting to WiFi");
   WiFi.begin(WiFi_SSID, WiFi_Password);
   WiFi.mode(WIFI_STA);
@@ -104,6 +106,11 @@ void loop() {
 
     //Show sensor values on display
     drawDashboard();
+
+    if (millis() - millis_lastStorage >= storageInterval) {
+      millis_lastStorage = millis();
+      saveMeasurement();
+    }
   }
 
   // If not connected with WiFi, try to connect
@@ -222,4 +229,73 @@ void handleApi() {
   json += "}";
 
   server.send(200, "application/json", json);
+}
+
+// Save measured data
+void saveMeasurement() {
+  const char* path = "/measurements.csv";
+
+  // Check file size
+  File file = LittleFS.open(path, "r");
+
+  if (file && file.size() >= maxFileSize) {
+    file.close();
+
+    File oldFile = LittleFS.open(path, "r");
+    File newFile = LittleFS.open("/temp.csv", "w");
+
+    if (!oldFile || !newFile) {
+      Serial.println("File rotation failed!");
+      return;
+    }
+
+    // Skip header
+    oldFile.readStringUntil('\n');
+
+    // Keep only newer measurements
+    size_t skipBytes = oldFile.size() / 5;
+
+    while (skipBytes > 0 && oldFile.available()) {
+      if (oldFile.read() == '\n') {
+        skipBytes--;
+      }
+    }
+
+    newFile.println("timestamp,water,light");
+
+    while (oldFile.available()) {
+      newFile.write(oldFile.read());
+    }
+
+    oldFile.close();
+    newFile.close();
+
+    LittleFS.remove(path);
+    LittleFS.rename("/temp.csv", path);
+  } else if (file) {
+    file.close();
+  }
+
+  // Save new measurement
+  file = LittleFS.open(path, "a");
+
+  if (!file) {
+    Serial.println("Failed to open measurement file");
+    return;
+  }
+
+  if (file.size() == 0) {
+    file.println("timestamp,water,light");
+  }
+
+  time_t now;
+  time(&now);
+
+  file.print((long)now);
+  file.print(",");
+  file.print(waterPercent);
+  file.print(",");
+  file.println(ldrPercent);
+
+  file.close();
 }

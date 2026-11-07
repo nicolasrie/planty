@@ -6,6 +6,7 @@
 - Dual Sensor Tracking to know exactly what your plant needs
 - OLED Live Dashboard right next to your plant
 - API with External Dashboard or Local Web Server
+- Local storage of recent measurement data
 
 ## Hardware
 - ESP32 C3 SuperMini
