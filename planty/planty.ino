@@ -83,11 +83,12 @@ void setup() {
   // Configure timezone and synchronize time using NTP
   configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
 
+  // Register the API endpoint
+  server.on("/api/status", HTTP_GET, handleApi);
+  server.on("/api/history", HTTP_GET, handleHistory);
+
   // Configure the web server depending on the selected dashboard mode
-  if (External_Dashboard == true) {
-    // Register the API endpoint for external dashboard access
-    server.on("/api/status", HTTP_GET, handleApi);
-  } else {
+  if (!External_Dashboard) {
     // Register the routes for the internal dashboard
     server.on("/", HTTP_GET, handleRoot);
     server.on("/style.css", HTTP_GET, handleCss);
@@ -229,6 +230,81 @@ void handleApi() {
   json += "}";
 
   server.send(200, "application/json", json);
+}
+
+
+void handleHistory() {
+    File file = LittleFS.open("/measurements.csv", "r");
+    if (!file) {
+        server.send(404, "application/json",
+                    "{\"error\":\"History file not found\"}");
+        return;
+    }
+    // Get current time
+    time_t now;
+    time(&now);
+
+    if (now < 1700000000) {
+        file.close();
+        server.send(503, "application/json",
+                    "{\"error\":\"Time not synchronized\"}");
+        return;
+    }
+
+    const time_t sevenDays = 7 * 24 * 60 * 60;
+    time_t cutoff = now - sevenDays;
+
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, "application/json", "");
+    server.sendContent("[");
+    bool firstEntry = true;
+    file.readStringUntil('\n');
+
+    while (file.available()) {
+        String line = file.readStringUntil('\n');
+        line.trim();
+
+        if (line.length() == 0) {
+            continue;
+        }
+        int firstComma = line.indexOf(',');
+        int secondComma = line.indexOf(',', firstComma + 1);
+
+        if (firstComma == -1 || secondComma == -1) {
+            continue;
+        }
+
+        // Read CSV values
+        time_t timestamp = strtoll(
+            line.substring(0, firstComma).c_str(),
+            nullptr,
+            10
+        );
+        int water = line.substring(
+            firstComma + 1,
+            secondComma
+        ).toInt();
+        int light = line.substring(
+            secondComma + 1
+        ).toInt();
+
+        // Filter values (only the last 7 days)
+        if (timestamp < cutoff || timestamp > now) {
+            continue;
+        }
+        if (!firstEntry) {
+            server.sendContent(",");
+        }
+        String json = "{";
+        json += "\"timestamp\":" + String((long long)timestamp);
+        json += ",\"water\":" + String(water);
+        json += ",\"light\":" + String(light);
+        json += "}";
+        server.sendContent(json);
+        firstEntry = false;
+    }
+    server.sendContent("]");
+    file.close();
 }
 
 // Save measured data
