@@ -57,5 +57,10 @@ Use the LittleFS Data Upload tool in your Arduino IDE (Cmd + Shift + P -> Upload
 ### 4. Flash the Code
 Open the main sketch in your Arduino IDE, select your ESP32-C3 Dev Module, and upload the code.
 
+## Usage of AI
+
+This project was developed with the **assistance of AI tools**. AI was used to support **parts** of the coding, debugging, and implementation process (mostly for HTML, JavaScript and CSS).
+The generated code was reviewed, adapted, and tested as part of the development process.
+
 ## Attribution
 [Tea leaf icon](https://www.flaticon.com/free-icons/tea-leaf)
