@@ -81,5 +81,22 @@
             </a>
         </footer>
     </main>
+    <script>
+        async function updateDashboard() {
+                const response = await fetch("/api/status");
+                if (!response.ok) {
+                    throw new Error("API request failed");
+                }
+                const data = await response.json();
+                document.getElementById("waterValue").textContent =
+                    data.water + "%";
+                document.getElementById("lightValue").textContent =
+                    data.light + "%";
+        }
+
+        updateDashboard();
+        // Refresh every 5 seconds
+        setInterval(updateDashboard, 5000);
+    </script>
 </body>
 </html>
