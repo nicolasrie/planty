@@ -26,6 +26,11 @@
 3. Type the Planty's local IP address into any browser on your home network to check your plant's status.
 
 
+## Wiring Diagram
+
+![Planty Wiring Diagram](assets/wiring_diagram.svg)
+
+
 ## Getting Started
 ### 1. Configure WiFi Credentials
 Create a file named `secrets.h` (or just rename `example_secrets.h`) in your project root directory and add your Wi-Fi details:
