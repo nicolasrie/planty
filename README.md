@@ -1,18 +1,21 @@
 ![](assets/planty_banner.png)
 
-*Planty* is an smart plant monitoring system powered by an ESP32-C3. It tracks your plant's vital signs and displays them locally on a OLED screen and a local web dashboard.
+*Planty* is a smart plant monitoring system powered by an ESP32-C3. It tracks your plant's vital signs and displays them locally on a OLED screen and a local web dashboard.
+
+
+![C++](https://img.shields.io/badge/c%2B%2B-%2300599C.svg?style=for-the-badge&logo=cplusplus&logoColor=white)     ![Arduino IDE](https://img.shields.io/badge/Arduino%20IDE-%2300979D.svg?style=for-the-badge&logo=Arduino&logoColor=white)     ![ESP32-C3](https://img.shields.io/badge/ESP32--C3-%2300599C.svg?style=for-the-badge&logo=espressif&logoColor=white)
 
 
 ## Features
 - Dual Sensor Tracking to know exactly what your plant needs
-- OLED Live Dashboard right next to your plant
+- Live OLED Dashboard right next to your plant
 - API with External Dashboard or Local Web Server
 - Local storage of recent measurement data
 
 
 ## Hardware
 - ESP32 C3 SuperMini
-- 0,96 Inch OLED Display
+- 0.96-inch OLED display
 - LDR
 - HW-038 Water Sensor
 
