@@ -145,4 +145,7 @@ The generated code was reviewed, adapted, and tested as part of the development 
 
 
 ## Attribution
-[Tea leaf icon](https://www.flaticon.com/free-icons/tea-leaf)
+
+[Lucide icons](https://lucide.dev)
+
+[Tea leaf icon](https://www.flaticon.com/free-icon/tea-leaves_11298473?term=tea+leaf&page=1&position=1&origin=tag&related_id=11298473)
