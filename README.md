@@ -13,6 +13,9 @@
 - Local storage of recent measurement data
 
 
+## Dashboard
+![Dashboard Preview](assets/dashboard.png)
+
 ## Hardware
 - ESP32 C3 SuperMini
 - 0.96-inch OLED display
